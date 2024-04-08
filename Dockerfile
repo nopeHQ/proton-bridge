@@ -43,7 +43,7 @@ ENV PROTON_BRIDGE_HOST=$ENV_BRIDGE_HOST
 RUN apk update
 RUN apk upgrade
 RUN apk add --no-cache bash socat net-tools libsecret pass gpg gpg-agent ca-certificates 
-RUN apk add --no-cache tailscale iptables iproute2 ip6tables
+RUN apk add --no-cache tailscale iptables iproute2 ip6tables iputils
 
 # RUN rc-update add dbus
 # RUN touch /run/openrc/softlevel

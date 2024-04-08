@@ -43,9 +43,16 @@ sleep 3
 tailscale up --authkey=$TS_AUTHKEY $TS_EXTRA_ARGS
 sleep 3
 
-# Proton mail bridge listen only on 127.0.0.1 interface, we need to forward TCP traffic on SMTP and IMAP ports:
-socat TCP-LISTEN:25,so-bindtodevice=tailscale0,reuseaddr,fork TCP:"$PROTON_BRIDGE_HOST":"$PROTON_BRIDGE_SMTP_PORT" &
-socat TCP-LISTEN:143,so-bindtodevice=tailscale0,reuseaddr,fork TCP:"$PROTON_BRIDGE_HOST":"$PROTON_BRIDGE_IMAP_PORT" &
+# Serve TLS SMTP via Tailscale
+tailscale serve --bg --tls-terminated-tcp 25 tcp://localhost:1025
+tailscale serve --bg --tls-terminated-tcp 587 tcp://localhost:1025
+tailscale serve --bg --tls-terminated-tcp 465 tcp://localhost:1025
+tailscale serve --bg --tls-terminated-tcp 2525 tcp://localhost:1025
+
+# Serve TLS IMAP via Tailscale
+tailscale serve --bg --tls-terminated-tcp 143 tcp://localhost:1143
+tailscale serve --bg --tls-terminated-tcp 585 tcp://localhost:1143
+tailscale serve --bg --tls-terminated-tcp 993 tcp://localhost:1143
 
 # Start a default Proton Mail Bridge on a fake tty, so it won't stop because of EOF
 rm -f faketty
