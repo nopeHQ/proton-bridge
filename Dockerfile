@@ -12,6 +12,9 @@ WORKDIR /build/
 RUN git clone https://github.com/ProtonMail/proton-bridge.git
 WORKDIR /build/proton-bridge/
 
+# Check out the latest stable release
+RUN git fetch --all --tags && git checkout tags/v3.10.0 -b stable
+
 # Resolves https://github.com/mattn/go-sqlite3/pull/1177
 COPY fix_sqlite.sh /build/proton-bridge/
 RUN chmod u+x /build/proton-bridge/fix_sqlite.sh
