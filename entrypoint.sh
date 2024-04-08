@@ -2,6 +2,8 @@
 
 set -ex
 
+rm -f /root/.gnupg/public-keys.d/pubring.db.lock
+
 # Check if the gpg key exist, if not created it. Should be run only on first launch.
 if [ ! -d "/root/.password-store/" ]; then
   gpg --generate-key --batch /app/gpgparams.txt
@@ -39,6 +41,7 @@ fi
 tailscaled --tun=userspace-networking &
 sleep 3
 tailscale up --authkey=$TS_AUTHKEY $TS_EXTRA_ARGS
+sleep 3
 
 # Proton mail bridge listen only on 127.0.0.1 interface, we need to forward TCP traffic on SMTP and IMAP ports:
 socat TCP-LISTEN:25,so-bindtodevice=tailscale0,reuseaddr,fork TCP:"$PROTON_BRIDGE_HOST":"$PROTON_BRIDGE_SMTP_PORT" &
