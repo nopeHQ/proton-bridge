@@ -4,13 +4,18 @@ LABEL authors="Charlton Trezevant"
 # Install dependencies
 RUN apk update
 RUN apk add bash
-RUN apk add make gcc g++ libc-dev musl musl-dev sed grep sed
+RUN apk add make gcc g++ libc-dev musl musl-dev sed grep
 RUN apk add git libsecret libsecret-dev pass curl lsof
 
 # Build stage
 WORKDIR /build/
 RUN git clone https://github.com/ProtonMail/proton-bridge.git
 WORKDIR /build/proton-bridge/
+
+# Resolves https://github.com/mattn/go-sqlite3/pull/1177
+COPY fix_sqlite.sh /build/proton-bridge/
+RUN chmod u+x /build/proton-bridge/fix_sqlite.sh
+RUN /bin/bash -c '/build/proton-bridge/fix_sqlite.sh'
 
 # make
 RUN make build-nogui
