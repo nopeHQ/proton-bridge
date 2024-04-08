@@ -42,9 +42,7 @@ ENV PROTON_BRIDGE_HOST=$ENV_BRIDGE_HOST
 # Install dependencies
 RUN apk update
 RUN apk upgrade
-RUN apk add bash socat net-tools libsecret pass gpg gpg-agent ca-certificates tailscale openrc
-
-RUN rc-update add tailscale default
+RUN apk add bash socat net-tools libsecret pass gpg gpg-agent ca-certificates tailscale
 
 # RUN rc-update add dbus
 # RUN touch /run/openrc/softlevel
