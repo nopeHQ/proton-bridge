@@ -1,19 +1,24 @@
-FROM golang:bookworm AS build
-LABEL authors="David BASTIEN"
+FROM golang:1.22-alpine AS build
+LABEL authors="Charlton Trezevant"
 
 # Install dependencies
-RUN apt-get update && apt-get install -y git build-essential libsecret-1-dev
+RUN apk update
+RUN apk add bash
+RUN apk add make gcc g++ libc-dev musl musl-dev sed grep sed
+RUN apk add git libsecret libsecret-dev pass curl lsof
 
 # Build stage
 WORKDIR /build/
 RUN git clone https://github.com/ProtonMail/proton-bridge.git
 WORKDIR /build/proton-bridge/
+
+# make
 RUN make build-nogui
 
 # Working stage image
-FROM golang:bookworm
-LABEL authors="David BASTIEN"
-LABEL org.opencontainers.image.source="https://github.com/VideoCurio/ProtonMailBridgeDocker"
+FROM golang:1.22-alpine
+LABEL authors="Charlton Trezevant"
+LABEL org.opencontainers.image.source="https://ghcr.io/nopehq/proton-bridge"
 
 # Define arguments and env variables
 # Indicate (NOT define) the ports/network interface really used by Proton bridge mail.
@@ -27,7 +32,14 @@ ENV PROTON_BRIDGE_IMAP_PORT=$ENV_BRIDGE_IMAP_PORT
 ENV PROTON_BRIDGE_HOST=$ENV_BRIDGE_HOST
 
 # Install dependencies
-RUN apt-get update && apt-get install -y bash socat net-tools pass ca-certificates libsecret-1-0
+RUN apk update
+RUN apk upgrade
+RUN apk add bash socat net-tools libsecret pass gpg gpg-agent ca-certificates tailscale
+
+# RUN rc-update add dbus
+# RUN touch /run/openrc/softlevel
+# RUN rc-service dbus start
+
 # Copy executables made during previous stage
 WORKDIR /app/
 COPY --from=build /build/proton-bridge/bridge /app/
@@ -36,9 +48,7 @@ COPY --from=build /build/proton-bridge/proton-bridge /app/
 # Install needed scripts and files
 COPY entrypoint.sh /app/
 RUN chmod u+x /app/entrypoint.sh
-COPY GPGparams.txt /app/
-
-COPY LICENSE.txt /app/
+COPY gpgparams.txt /app/
 
 # Expose SMTP and IMAP ports
 # The entrypoint script will forward this ports to the ports really used by Proton mail bridge.

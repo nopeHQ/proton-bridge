@@ -1,0 +1,35 @@
+name: publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+    
+env:
+  REGISTRY: "ghcr.io"
+  GHCR_ORG: "nopehq"
+  CONTAINER_NAME: "proton-bridge"
+  CONTAINER_TAG: "latest"
+
+jobs:
+  publish-container:
+    name: Publish Container to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: GHCR Login
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GHCR_ORG,,}" >>${GITHUB_ENV}
+      - name: Build and Publish
+        run: |
+          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPO }}/${{ env.CONTAINER_NAME }}:${{ env.CONTAINER_TAG }}
+          docker push ghcr.io/${{ env.REPO }}/${{ env.CONTAINER_NAME }}:${{ env.CONTAINER_TAG }}
