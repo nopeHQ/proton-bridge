@@ -36,7 +36,7 @@ if ! [[ -v TS_STATE_DIR ]]; then
   export TS_STATE_DIR="/var/lib/tailscale"
 fi
 
-tailscale up --authkey=$TS_AUTHKEY $TS_EXTRA_ARGS
+rc-service tailscale start && tailscale up --authkey=$TS_AUTHKEY $TS_EXTRA_ARGS
 
 # Proton mail bridge listen only on 127.0.0.1 interface, we need to forward TCP traffic on SMTP and IMAP ports:
 socat TCP-LISTEN:25,so-bindtodevice=tailscale0,reuseaddr,fork TCP:"$PROTON_BRIDGE_HOST":"$PROTON_BRIDGE_SMTP_PORT" &
