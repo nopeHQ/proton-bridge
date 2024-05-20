@@ -29,6 +29,10 @@ if ! [[ -v TS_AUTHKEY ]]; then
   exit 1
 fi
 
+if ! [[ -v TAILSCALED_EXTRA_ARGS ]]; then
+  export TAILSCALED_EXTRA_ARGS=""
+fi
+
 if ! [[ -v TS_EXTRA_ARGS ]]; then
   echo "Warning: Environment variable TS_EXTRA_ARGS is not set"
 fi
@@ -38,7 +42,7 @@ if ! [[ -v TS_STATE_DIR ]]; then
   export TS_STATE_DIR="/var/lib/tailscale"
 fi
 
-tailscaled --tun=userspace-networking &
+tailscaled --tun=userspace-networking $TAILSCALED_EXTRA_ARGS &
 sleep 3
 tailscale up --authkey=$TS_AUTHKEY $TS_EXTRA_ARGS
 sleep 3

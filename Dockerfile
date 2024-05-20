@@ -43,7 +43,11 @@ ENV PROTON_BRIDGE_HOST=$ENV_BRIDGE_HOST
 RUN apk update
 RUN apk upgrade
 RUN apk add --no-cache bash socat net-tools libsecret pass gpg gpg-agent ca-certificates 
-RUN apk add --no-cache tailscale iptables iproute2 ip6tables iputils
+RUN apk add --no-cache iptables iproute2 ip6tables iputils curl
+
+# Install Tailscale
+RUN curl -fsSL https://tailscale.com/install.sh | sh \
+    ; exit 0 # Ignore exit code from missing rc-update
 
 # RUN rc-update add dbus
 # RUN touch /run/openrc/softlevel
