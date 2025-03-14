@@ -1,6 +1,6 @@
 FROM golang:1.24.1-alpine AS build
 LABEL authors="Charlton Trezevant"
-ARG PROTON_VERSION=3.10.0
+ARG PROTON_VERSION=3.18.0
 
 # Install dependencies
 RUN apk update
