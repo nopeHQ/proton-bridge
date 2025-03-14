@@ -1,5 +1,6 @@
-FROM golang:1.22-alpine AS build
+FROM golang:1.24.1-alpine AS build
 LABEL authors="Charlton Trezevant"
+ARG PROTON_VERSION=3.10.0
 
 # Install dependencies
 RUN apk update
@@ -13,18 +14,13 @@ RUN git clone https://github.com/ProtonMail/proton-bridge.git
 WORKDIR /build/proton-bridge/
 
 # Check out the latest stable release
-RUN git fetch --all --tags && git checkout tags/v3.10.0 -b stable
-
-# Resolves https://github.com/mattn/go-sqlite3/pull/1177
-COPY fix_sqlite.sh /build/proton-bridge/
-RUN chmod u+x /build/proton-bridge/fix_sqlite.sh
-RUN /bin/bash -c '/build/proton-bridge/fix_sqlite.sh'
+RUN git fetch --all --tags && git checkout tags/v${PROTON_VERSION} -b stable
 
 # make
-RUN make build-nogui
+RUN CGO_CFLAGS="-D_LARGEFILE64_SOURCE" make build-nogui
 
 # Working stage image
-FROM golang:1.22-alpine
+FROM golang:1.24.1-alpine
 LABEL authors="Charlton Trezevant"
 LABEL org.opencontainers.image.source="https://ghcr.io/nopehq/proton-bridge"
 
@@ -64,9 +60,10 @@ RUN chmod u+x /app/entrypoint.sh
 COPY gpgparams.txt /app/
 
 # Expose SMTP and IMAP ports
-# The entrypoint script will forward this ports to the ports really used by Proton mail bridge.
-EXPOSE 25/tcp
-EXPOSE 143/tcp
+# The entrypoint script would forward these ports to the ports really used by Proton mail bridge, but
+# it's not necessary since we're serving them directly on the tailnet via `tailscale serve`
+#EXPOSE 25/tcp
+#EXPOSE 143/tcp
 
 # Volume to save pass and bridge configurations/data
 VOLUME /root
